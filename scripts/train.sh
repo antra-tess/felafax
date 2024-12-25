@@ -26,7 +26,7 @@ run_on_worker() {
     local worker=$1
     echo "Setting up worker $worker..."
     # Copy training script
-    gcloud compute tpus tpu-vm scp /tmp/run_training.py $POD_NAME:/tmp/run_training.py --zone=$ZONE --worker=$worker &
+    gcloud compute tpus tpu-vm scp scripts/run_training.py $POD_NAME:/tmp/run_training.py --zone=$ZONE --worker=$worker &
 }
 
 # Start setup on all workers in parallel

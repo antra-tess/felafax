@@ -16,8 +16,11 @@ echo "Conda environment activated successfully"
 echo "Installing requirements..."
 cd "$REPO_DIR"
 
-# Set TPU environment variable
-echo 'export PJRT_DEVICE=TPU' >> ~/.bashrc
+# Set TPU environment variable if not already set
+if ! grep -q "export PJRT_DEVICE=TPU" ~/.bashrc; then
+    echo 'export PJRT_DEVICE=TPU' >> ~/.bashrc
+    echo "Added PJRT_DEVICE environment variable"
+fi
 
 # Install specific versions of dependencies
 $PIP_PATH install --no-cache-dir transformers==4.43.3

@@ -6,7 +6,7 @@ ZONE="us-central2-b"
 NUM_WORKERS=8
 
 # Configuration
-MODEL_NAME="/mnt/disk2/llama-3.1-8b"
+MODEL_NAME="/mnt/disk2/Llama-3.1-8B"
 TRAINER_DIR="/mnt/disk2/felafax_runs"
 CHECKPOINT_DIR="$TRAINER_DIR/checkpoints"
 EXPORT_DIR="$TRAINER_DIR/finetuned_export"

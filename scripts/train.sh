@@ -11,11 +11,13 @@ TRAINER_DIR="/mnt/disk2/felafax_runs"
 CHECKPOINT_DIR="$TRAINER_DIR/checkpoints"
 EXPORT_DIR="$TRAINER_DIR/finetuned_export"
 
-# Create directories on shared disk with proper permissions (only need to do this once since it's shared)
-echo "Creating shared directories..."
-sudo mkdir -p $TRAINER_DIR $CHECKPOINT_DIR $EXPORT_DIR
-sudo chown -R antra_tesserae_cc:antra_tesserae_cc $TRAINER_DIR
-sudo chmod -R 775 $TRAINER_DIR
+# Create directories on shared disk using the first worker
+echo "Creating shared directories using worker 0..."
+gcloud compute tpus tpu-vm ssh $POD_NAME --zone=$ZONE --worker=0 --command="
+    sudo mkdir -p $TRAINER_DIR $CHECKPOINT_DIR $EXPORT_DIR && \
+    sudo chown -R antra_tesserae_cc:antra_tesserae_cc $TRAINER_DIR && \
+    sudo chmod -R 775 $TRAINER_DIR
+"
 
 # Copy the training script to workers
 

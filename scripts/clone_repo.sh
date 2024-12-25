@@ -4,11 +4,12 @@ set -e
 REPO_URL="https://github.com/antra-tess/felafax"
 TARGET_DIR="$HOME/felafax_repo"
 
-echo "Cloning Felafax repository..."
+echo "Cloning/updating Felafax repository..."
 if [ -d "$TARGET_DIR" ]; then
-    echo "Directory exists, pulling latest changes..."
+    echo "Directory exists, fetching and resetting to latest changes..."
     cd "$TARGET_DIR"
-    git pull
+    git fetch origin
+    git reset --hard origin/main
 else
     echo "Cloning fresh repository..."
     git clone "$REPO_URL" "$TARGET_DIR"

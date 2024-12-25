@@ -7,7 +7,7 @@ ENV_NAME=felafax_env
 REPO_DIR="$HOME/felafax_repo"
 
 # Activate conda environment
-source /opt/conda/bin/activate $ENV_NAME
+source /home/antra_tesserae_cc/miniforge3/bin/activate $ENV_NAME
 
 echo "Installing requirements..."
 cd "$REPO_DIR"

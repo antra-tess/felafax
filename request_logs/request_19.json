@@ -1,0 +1,72 @@
+{
+  "request": {
+    "model": "claude-3-5-haiku-20241022",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an expert software engineer that generates concise, one-line Git commit messages based on the provided diffs.\nReview the provided context and diffs which are about to be committed to a git repo.\nReview the diffs carefully.\nGenerate a one-line commit message for those changes.\nThe commit message should be structured as follows: <type>: <description>\nUse these for <type>: fix, feat, build, chore, ci, docs, style, refactor, perf, test\n\nEnsure the commit message:\n- Starts with the appropriate prefix.\n- Is in the imperative mood (e.g., \"Add feature\" not \"Added feature\" or \"Adding feature\").\n- Does not exceed 72 characters.\n\nReply only with the one-line commit message, without any additional text, explanations, or line breaks.\n"
+      },
+      {
+        "role": "user",
+        "content": "\nUSER: <system>Command:\n\n./scripts/deploy_repo.sh\n\nOutput:\n\nCloning repository on all workers...\r\nCloning repo on worker 0...\r\nUsing scp batch size of 1.Attempting to SCP into 1 nodes with a total of 1 workers.\r\nSCP: Attempting to connect to worker 0...\r\n\rclone_repo.sh                                   0%    0     0.0KB/s   --:-- ETA\rclone_repo.sh                                 100%  384     5.2KB/s   00:00    \r\nUsing ssh batch size of 1. Attempting to SSH into 1 nodes with a total of 1 workers.\r\nSSH: Attempting to connect to worker 0...\r\nCloning Felafax repository...\r\nCloning fresh repository...\r\nCloning into '/mnt/disk2/felafax_repo'...\r\n^C\n</system>\n\nASSISTANT: <ack/>\n\nUSER: <human timestamp=\"2024-12-25 16:17:44\">We should not clone into the disk, its the same disk for all workers, shared. Clone to the home folde rinstead.</human>\n\nASSISTANT: I'll update the clone_repo.sh script to use the home directory instead:\n\nscripts/clone_repo.sh\n<source>bash\n<<<<<<< SEARCH\nREPO_URL=\"https://github.com/antra-tess/felafax\"\nTARGET_DIR=\"/mnt/disk2/felafax_repo\"\n=======\nREPO_URL=\"https://github.com/antra-tess/felafax\"\nTARGET_DIR=\"$HOME/felafax_repo\"\n>>>>>>> REPLACE\n</source>\n\nAnd I'll need to update setup_environment.sh to match this new path:\n\nscripts/setup_environment.sh\n<source>bash\n<<<<<<< SEARCH\nCONDA_PATH=/home/antra_tesserae_cc/miniforge3/bin/conda\nPIP_PATH=/home/antra_tesserae_cc/miniforge3/envs/felafax_env/bin/pip\nENV_NAME=felafax_env\nREPO_DIR=\"/mnt/disk2/felafax_repo\"\n=======\nCONDA_PATH=/home/antra_tesserae_cc/miniforge3/bin/conda\nPIP_PATH=/home/antra_tesserae_cc/miniforge3/envs/felafax_env/bin/pip\nENV_NAME=felafax_env\nREPO_DIR=\"$HOME/felafax_repo\"\n>>>>>>> REPLACE\n</source>\n\nThese changes will:\n1. Clone the repository to each worker's home directory\n2. Update the setup script to look for the repository in the new location\n3. Keep the installations separate for each worker\n\nLet's try running the deployment scripts again with these changes.\n\n# Diffs:\ndiff --git a/scripts/clone_repo.sh b/scripts/clone_repo.sh\nindex 1259597..d076670 100644\n--- a/scripts/clone_repo.sh\n+++ b/scripts/clone_repo.sh\n@@ -2,7 +2,7 @@\n set -e\n \n REPO_URL=\"https://github.com/antra-tess/felafax\"\n-TARGET_DIR=\"/mnt/disk2/felafax_repo\"\n+TARGET_DIR=\"$HOME/felafax_repo\"\n \n echo \"Cloning Felafax repository...\"\n if [ -d \"$TARGET_DIR\" ]; then\ndiff --git a/scripts/setup_environment.sh b/scripts/setup_environment.sh\nindex 2a2308e..347d893 100644\n--- a/scripts/setup_environment.sh\n+++ b/scripts/setup_environment.sh\n@@ -4,7 +4,7 @@ set -e\n CONDA_PATH=/home/antra_tesserae_cc/miniforge3/bin/conda\n PIP_PATH=/home/antra_tesserae_cc/miniforge3/envs/felafax_env/bin/pip\n ENV_NAME=felafax_env\n-REPO_DIR=\"/mnt/disk2/felafax_repo\"\n+REPO_DIR=\"$HOME/felafax_repo\"\n \n # Activate conda environment\n source /opt/conda/bin/activate $ENV_NAME"
+      }
+    ],
+    "functions": null,
+    "stream": false,
+    "temperature": 0,
+    "extra_params": {
+      "extra_headers": {
+        "anthropic-beta": "prompt-caching-2024-07-31,pdfs-2024-09-25"
+      }
+    },
+    "kwargs": {
+      "model": "claude-3-5-haiku-20241022",
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are an expert software engineer that generates concise, one-line Git commit messages based on the provided diffs.\nReview the provided context and diffs which are about to be committed to a git repo.\nReview the diffs carefully.\nGenerate a one-line commit message for those changes.\nThe commit message should be structured as follows: <type>: <description>\nUse these for <type>: fix, feat, build, chore, ci, docs, style, refactor, perf, test\n\nEnsure the commit message:\n- Starts with the appropriate prefix.\n- Is in the imperative mood (e.g., \"Add feature\" not \"Added feature\" or \"Adding feature\").\n- Does not exceed 72 characters.\n\nReply only with the one-line commit message, without any additional text, explanations, or line breaks.\n"
+        },
+        {
+          "role": "user",
+          "content": "\nUSER: <system>Command:\n\n./scripts/deploy_repo.sh\n\nOutput:\n\nCloning repository on all workers...\r\nCloning repo on worker 0...\r\nUsing scp batch size of 1.Attempting to SCP into 1 nodes with a total of 1 workers.\r\nSCP: Attempting to connect to worker 0...\r\n\rclone_repo.sh                                   0%    0     0.0KB/s   --:-- ETA\rclone_repo.sh                                 100%  384     5.2KB/s   00:00    \r\nUsing ssh batch size of 1. Attempting to SSH into 1 nodes with a total of 1 workers.\r\nSSH: Attempting to connect to worker 0...\r\nCloning Felafax repository...\r\nCloning fresh repository...\r\nCloning into '/mnt/disk2/felafax_repo'...\r\n^C\n</system>\n\nASSISTANT: <ack/>\n\nUSER: <human timestamp=\"2024-12-25 16:17:44\">We should not clone into the disk, its the same disk for all workers, shared. Clone to the home folde rinstead.</human>\n\nASSISTANT: I'll update the clone_repo.sh script to use the home directory instead:\n\nscripts/clone_repo.sh\n<source>bash\n<<<<<<< SEARCH\nREPO_URL=\"https://github.com/antra-tess/felafax\"\nTARGET_DIR=\"/mnt/disk2/felafax_repo\"\n=======\nREPO_URL=\"https://github.com/antra-tess/felafax\"\nTARGET_DIR=\"$HOME/felafax_repo\"\n>>>>>>> REPLACE\n</source>\n\nAnd I'll need to update setup_environment.sh to match this new path:\n\nscripts/setup_environment.sh\n<source>bash\n<<<<<<< SEARCH\nCONDA_PATH=/home/antra_tesserae_cc/miniforge3/bin/conda\nPIP_PATH=/home/antra_tesserae_cc/miniforge3/envs/felafax_env/bin/pip\nENV_NAME=felafax_env\nREPO_DIR=\"/mnt/disk2/felafax_repo\"\n=======\nCONDA_PATH=/home/antra_tesserae_cc/miniforge3/bin/conda\nPIP_PATH=/home/antra_tesserae_cc/miniforge3/envs/felafax_env/bin/pip\nENV_NAME=felafax_env\nREPO_DIR=\"$HOME/felafax_repo\"\n>>>>>>> REPLACE\n</source>\n\nThese changes will:\n1. Clone the repository to each worker's home directory\n2. Update the setup script to look for the repository in the new location\n3. Keep the installations separate for each worker\n\nLet's try running the deployment scripts again with these changes.\n\n# Diffs:\ndiff --git a/scripts/clone_repo.sh b/scripts/clone_repo.sh\nindex 1259597..d076670 100644\n--- a/scripts/clone_repo.sh\n+++ b/scripts/clone_repo.sh\n@@ -2,7 +2,7 @@\n set -e\n \n REPO_URL=\"https://github.com/antra-tess/felafax\"\n-TARGET_DIR=\"/mnt/disk2/felafax_repo\"\n+TARGET_DIR=\"$HOME/felafax_repo\"\n \n echo \"Cloning Felafax repository...\"\n if [ -d \"$TARGET_DIR\" ]; then\ndiff --git a/scripts/setup_environment.sh b/scripts/setup_environment.sh\nindex 2a2308e..347d893 100644\n--- a/scripts/setup_environment.sh\n+++ b/scripts/setup_environment.sh\n@@ -4,7 +4,7 @@ set -e\n CONDA_PATH=/home/antra_tesserae_cc/miniforge3/bin/conda\n PIP_PATH=/home/antra_tesserae_cc/miniforge3/envs/felafax_env/bin/pip\n ENV_NAME=felafax_env\n-REPO_DIR=\"/mnt/disk2/felafax_repo\"\n+REPO_DIR=\"$HOME/felafax_repo\"\n \n # Activate conda environment\n source /opt/conda/bin/activate $ENV_NAME"
+        }
+      ],
+      "stream": false,
+      "temperature": 0,
+      "extra_headers": {
+        "anthropic-beta": "prompt-caching-2024-07-31,pdfs-2024-09-25"
+      }
+    }
+  },
+  "response": {
+    "id": "chatcmpl-6dd30da8-6614-4580-b121-a6c3c24d652b",
+    "created": 1735143474,
+    "model": "claude-3-5-haiku-20241022",
+    "object": "chat.completion",
+    "system_fingerprint": null,
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "message": {
+          "content": "refactor: Use home directory for repository cloning across workers",
+          "role": "assistant",
+          "tool_calls": null,
+          "function_call": null
+        }
+      }
+    ],
+    "usage": {
+      "completion_tokens": 15,
+      "prompt_tokens": 1239,
+      "total_tokens": 1254,
+      "completion_tokens_details": null,
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cached_tokens": 0
+      },
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

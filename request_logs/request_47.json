@@ -1,0 +1,72 @@
+{
+  "request": {
+    "model": "claude-3-5-haiku-20241022",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an expert software engineer that generates concise, one-line Git commit messages based on the provided diffs.\nReview the provided context and diffs which are about to be committed to a git repo.\nReview the diffs carefully.\nGenerate a one-line commit message for those changes.\nThe commit message should be structured as follows: <type>: <description>\nUse these for <type>: fix, feat, build, chore, ci, docs, style, refactor, perf, test\n\nEnsure the commit message:\n- Starts with the appropriate prefix.\n- Is in the imperative mood (e.g., \"Add feature\" not \"Added feature\" or \"Adding feature\").\n- Does not exceed 72 characters.\n\nReply only with the one-line commit message, without any additional text, explanations, or line breaks.\n"
+      },
+      {
+        "role": "user",
+        "content": "\nUSER: <human timestamp=\"2024-12-25 23:06:23\">Whoops, I think we need to add both pushing to the repo from the dev and pulling from it from the workers to ths cript.</human>\n\nASSISTANT: I'll update the train.sh script to handle git operations:\n\nscripts/train.sh\n<source>bash\n<<<<<<< SEARCH\n#!/bin/bash\nset -e\n\nPOD_NAME=\"finetune-70b\"\nZONE=\"us-central2-b\"\nNUM_WORKERS=8\n\n# Configuration\nMODEL_NAME=\"/mnt/disk2/Llama-3.1-8B\"\nTRAINER_DIR=\"/mnt/disk2/felafax_runs\"\nCHECKPOINT_DIR=\"$TRAINER_DIR/checkpoints\"\nEXPORT_DIR=\"$TRAINER_DIR/finetuned_export\"\n=======\n#!/bin/bash\nset -e\n\nPOD_NAME=\"finetune-70b\"\nZONE=\"us-central2-b\"\nNUM_WORKERS=8\n\n# Configuration\nMODEL_NAME=\"/mnt/disk2/Llama-3.1-8B\"\nTRAINER_DIR=\"/mnt/disk2/felafax_runs\"\nCHECKPOINT_DIR=\"$TRAINER_DIR/checkpoints\"\nEXPORT_DIR=\"$TRAINER_DIR/finetuned_export\"\n\n# Push latest changes to repo\necho \"Pushing latest changes to repository...\"\ngit add .\ngit commit -m \"feat: Update training configuration\" || true\ngit push origin main\n>>>>>>> REPLACE\n</source>\n\nAnd update clone_repo.sh to always pull the latest changes:\n\nscripts/clone_repo.sh\n<source>bash\n<<<<<<< SEARCH\necho \"Cloning Felafax repository...\"\nif [ -d \"$TARGET_DIR\" ]; then\n    echo \"Directory exists, pulling latest changes...\"\n    cd \"$TARGET_DIR\"\n    git pull\nelse\n    echo \"Cloning fresh repository...\"\n    git clone \"$REPO_URL\" \"$TARGET_DIR\"\nfi\n=======\necho \"Cloning/updating Felafax repository...\"\nif [ -d \"$TARGET_DIR\" ]; then\n    echo \"Directory exists, fetching and resetting to latest changes...\"\n    cd \"$TARGET_DIR\"\n    git fetch origin\n    git reset --hard origin/main\nelse\n    echo \"Cloning fresh repository...\"\n    git clone \"$REPO_URL\" \"$TARGET_DIR\"\nfi\n>>>>>>> REPLACE\n</source>\n\nThese changes will:\n1. Push any local changes from the dev machine before starting training\n2. Ensure workers get the absolute latest version by doing a hard reset to origin/main\n\nThe git reset --hard ensures we're always in sync with the remote repository, even if there were local changes on the workers.\n\n# Diffs:\ndiff --git a/scripts/clone_repo.sh b/scripts/clone_repo.sh\nindex d076670..fe27bfe 100644\n--- a/scripts/clone_repo.sh\n+++ b/scripts/clone_repo.sh\n@@ -4,11 +4,12 @@ set -e\n REPO_URL=\"https://github.com/antra-tess/felafax\"\n TARGET_DIR=\"$HOME/felafax_repo\"\n \n-echo \"Cloning Felafax repository...\"\n+echo \"Cloning/updating Felafax repository...\"\n if [ -d \"$TARGET_DIR\" ]; then\n-    echo \"Directory exists, pulling latest changes...\"\n+    echo \"Directory exists, fetching and resetting to latest changes...\"\n     cd \"$TARGET_DIR\"\n-    git pull\n+    git fetch origin\n+    git reset --hard origin/main\n else\n     echo \"Cloning fresh repository...\"\n     git clone \"$REPO_URL\" \"$TARGET_DIR\"\ndiff --git a/scripts/train.sh b/scripts/train.sh\nindex ce7dc24..d388ec7 100755\n--- a/scripts/train.sh\n+++ b/scripts/train.sh\n@@ -11,6 +11,12 @@ TRAINER_DIR=\"/mnt/disk2/felafax_runs\"\n CHECKPOINT_DIR=\"$TRAINER_DIR/checkpoints\"\n EXPORT_DIR=\"$TRAINER_DIR/finetuned_export\"\n \n+# Push latest changes to repo\n+echo \"Pushing latest changes to repository...\"\n+git add .\n+git commit -m \"feat: Update training configuration\" || true\n+git push origin main\n+\n # Create directories on shared disk using the first worker\n echo \"Creating shared directories using worker 0...\"\n gcloud compute tpus tpu-vm ssh $POD_NAME --zone=$ZONE --worker=0 --command=\""
+      }
+    ],
+    "functions": null,
+    "stream": false,
+    "temperature": 0,
+    "extra_params": {
+      "extra_headers": {
+        "anthropic-beta": "prompt-caching-2024-07-31,pdfs-2024-09-25"
+      }
+    },
+    "kwargs": {
+      "model": "claude-3-5-haiku-20241022",
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are an expert software engineer that generates concise, one-line Git commit messages based on the provided diffs.\nReview the provided context and diffs which are about to be committed to a git repo.\nReview the diffs carefully.\nGenerate a one-line commit message for those changes.\nThe commit message should be structured as follows: <type>: <description>\nUse these for <type>: fix, feat, build, chore, ci, docs, style, refactor, perf, test\n\nEnsure the commit message:\n- Starts with the appropriate prefix.\n- Is in the imperative mood (e.g., \"Add feature\" not \"Added feature\" or \"Adding feature\").\n- Does not exceed 72 characters.\n\nReply only with the one-line commit message, without any additional text, explanations, or line breaks.\n"
+        },
+        {
+          "role": "user",
+          "content": "\nUSER: <human timestamp=\"2024-12-25 23:06:23\">Whoops, I think we need to add both pushing to the repo from the dev and pulling from it from the workers to ths cript.</human>\n\nASSISTANT: I'll update the train.sh script to handle git operations:\n\nscripts/train.sh\n<source>bash\n<<<<<<< SEARCH\n#!/bin/bash\nset -e\n\nPOD_NAME=\"finetune-70b\"\nZONE=\"us-central2-b\"\nNUM_WORKERS=8\n\n# Configuration\nMODEL_NAME=\"/mnt/disk2/Llama-3.1-8B\"\nTRAINER_DIR=\"/mnt/disk2/felafax_runs\"\nCHECKPOINT_DIR=\"$TRAINER_DIR/checkpoints\"\nEXPORT_DIR=\"$TRAINER_DIR/finetuned_export\"\n=======\n#!/bin/bash\nset -e\n\nPOD_NAME=\"finetune-70b\"\nZONE=\"us-central2-b\"\nNUM_WORKERS=8\n\n# Configuration\nMODEL_NAME=\"/mnt/disk2/Llama-3.1-8B\"\nTRAINER_DIR=\"/mnt/disk2/felafax_runs\"\nCHECKPOINT_DIR=\"$TRAINER_DIR/checkpoints\"\nEXPORT_DIR=\"$TRAINER_DIR/finetuned_export\"\n\n# Push latest changes to repo\necho \"Pushing latest changes to repository...\"\ngit add .\ngit commit -m \"feat: Update training configuration\" || true\ngit push origin main\n>>>>>>> REPLACE\n</source>\n\nAnd update clone_repo.sh to always pull the latest changes:\n\nscripts/clone_repo.sh\n<source>bash\n<<<<<<< SEARCH\necho \"Cloning Felafax repository...\"\nif [ -d \"$TARGET_DIR\" ]; then\n    echo \"Directory exists, pulling latest changes...\"\n    cd \"$TARGET_DIR\"\n    git pull\nelse\n    echo \"Cloning fresh repository...\"\n    git clone \"$REPO_URL\" \"$TARGET_DIR\"\nfi\n=======\necho \"Cloning/updating Felafax repository...\"\nif [ -d \"$TARGET_DIR\" ]; then\n    echo \"Directory exists, fetching and resetting to latest changes...\"\n    cd \"$TARGET_DIR\"\n    git fetch origin\n    git reset --hard origin/main\nelse\n    echo \"Cloning fresh repository...\"\n    git clone \"$REPO_URL\" \"$TARGET_DIR\"\nfi\n>>>>>>> REPLACE\n</source>\n\nThese changes will:\n1. Push any local changes from the dev machine before starting training\n2. Ensure workers get the absolute latest version by doing a hard reset to origin/main\n\nThe git reset --hard ensures we're always in sync with the remote repository, even if there were local changes on the workers.\n\n# Diffs:\ndiff --git a/scripts/clone_repo.sh b/scripts/clone_repo.sh\nindex d076670..fe27bfe 100644\n--- a/scripts/clone_repo.sh\n+++ b/scripts/clone_repo.sh\n@@ -4,11 +4,12 @@ set -e\n REPO_URL=\"https://github.com/antra-tess/felafax\"\n TARGET_DIR=\"$HOME/felafax_repo\"\n \n-echo \"Cloning Felafax repository...\"\n+echo \"Cloning/updating Felafax repository...\"\n if [ -d \"$TARGET_DIR\" ]; then\n-    echo \"Directory exists, pulling latest changes...\"\n+    echo \"Directory exists, fetching and resetting to latest changes...\"\n     cd \"$TARGET_DIR\"\n-    git pull\n+    git fetch origin\n+    git reset --hard origin/main\n else\n     echo \"Cloning fresh repository...\"\n     git clone \"$REPO_URL\" \"$TARGET_DIR\"\ndiff --git a/scripts/train.sh b/scripts/train.sh\nindex ce7dc24..d388ec7 100755\n--- a/scripts/train.sh\n+++ b/scripts/train.sh\n@@ -11,6 +11,12 @@ TRAINER_DIR=\"/mnt/disk2/felafax_runs\"\n CHECKPOINT_DIR=\"$TRAINER_DIR/checkpoints\"\n EXPORT_DIR=\"$TRAINER_DIR/finetuned_export\"\n \n+# Push latest changes to repo\n+echo \"Pushing latest changes to repository...\"\n+git add .\n+git commit -m \"feat: Update training configuration\" || true\n+git push origin main\n+\n # Create directories on shared disk using the first worker\n echo \"Creating shared directories using worker 0...\"\n gcloud compute tpus tpu-vm ssh $POD_NAME --zone=$ZONE --worker=0 --command=\""
+        }
+      ],
+      "stream": false,
+      "temperature": 0,
+      "extra_headers": {
+        "anthropic-beta": "prompt-caching-2024-07-31,pdfs-2024-09-25"
+      }
+    }
+  },
+  "response": {
+    "id": "chatcmpl-f0aafaad-8e76-4355-8a4a-935db3198eff",
+    "created": 1735167999,
+    "model": "claude-3-5-haiku-20241022",
+    "object": "chat.completion",
+    "system_fingerprint": null,
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "message": {
+          "content": "feat: Add git push and pull operations to training scripts",
+          "role": "assistant",
+          "tool_calls": null,
+          "function_call": null
+        }
+      }
+    ],
+    "usage": {
+      "completion_tokens": 14,
+      "prompt_tokens": 1321,
+      "total_tokens": 1335,
+      "completion_tokens_details": null,
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cached_tokens": 0
+      },
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+}

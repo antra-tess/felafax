@@ -16,7 +16,23 @@ echo "Conda environment activated successfully"
 echo "Installing requirements..."
 cd "$REPO_DIR"
 
+# Set TPU environment variable
+echo 'export PJRT_DEVICE=TPU' >> ~/.bashrc
+
+# Install specific versions of dependencies
+$PIP_PATH install --no-cache-dir transformers==4.43.3
+$PIP_PATH install --no-cache-dir datasets==2.18.0
+$PIP_PATH install --no-cache-dir flax
+$PIP_PATH install --no-cache-dir einops
+$PIP_PATH install --no-cache-dir optax
+$PIP_PATH install --no-cache-dir chex
+$PIP_PATH install --no-cache-dir absl-py
+
+# Install JAX with TPU support
+$PIP_PATH install --upgrade jax
+$PIP_PATH install "jax[tpu]" -f https://storage.googleapis.com/jax-releases/libtpu_releases.html
+
 # Install package in editable mode with dependencies
 $PIP_PATH install -e .
 
-echo "Environment setup complete"
+echo "Environment setup complete with TPU-specific configurations"

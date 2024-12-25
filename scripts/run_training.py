@@ -2,6 +2,8 @@ import os
 os.environ['CUDA_VISIBLE_DEVICES'] = ''
 
 import jax
+from jax.experimental import multihost_utils
+jax.distributed.initialize()
 from transformers import AutoTokenizer
 from felafax.trainer_engine import checkpoint, trainer, utils
 from felafax.trainer_engine.data import data

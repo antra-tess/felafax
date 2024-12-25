@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-REPO_URL="https://github.com/antra-tess/felafax"
+REPO_URL="git@github.com:antra-tess/felafax.git"
 TARGET_DIR="$HOME/felafax_repo"
 
 echo "Cloning/updating Felafax repository..."

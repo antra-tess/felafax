@@ -21,6 +21,8 @@ git push origin main
 for worker in $(seq 0 $((NUM_WORKERS-1))); do
     echo "Pulling latest changes on worker $worker..."
     gcloud compute tpus tpu-vm ssh $POD_NAME --zone=$ZONE --worker=$worker --command="
+        mkdir -p ~/.ssh && \
+        ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts && \
         cd \$HOME/felafax_repo && \
         git fetch origin && \
         git reset --hard origin/main

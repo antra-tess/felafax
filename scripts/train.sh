@@ -11,11 +11,23 @@ TRAINER_DIR="/mnt/disk2/felafax_runs"
 CHECKPOINT_DIR="$TRAINER_DIR/checkpoints"
 EXPORT_DIR="$TRAINER_DIR/finetuned_export"
 
-# Push latest changes to repo
-echo "Pushing latest changes to repository..."
+# Push and pull latest changes
+echo "Syncing repository changes..."
 git add .
 git commit -m "feat: Update training configuration" || true
 git push origin main
+
+# Pull latest changes on all workers
+for worker in $(seq 0 $((NUM_WORKERS-1))); do
+    echo "Pulling latest changes on worker $worker..."
+    gcloud compute tpus tpu-vm ssh $POD_NAME --zone=$ZONE --worker=$worker --command="
+        cd \$HOME/felafax_repo && \
+        git fetch origin && \
+        git reset --hard origin/main
+    " &
+done
+
+wait
 
 # Create directories on shared disk using the first worker
 echo "Creating shared directories using worker 0..."

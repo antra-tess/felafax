@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-CONDA_PATH=/opt/conda/bin/conda
-PIP_PATH=/opt/conda/envs/felafax_env/bin/pip
+CONDA_PATH=/home/antra_tesserae_cc/miniforge3/bin/conda
+PIP_PATH=/home/antra_tesserae_cc/miniforge3/envs/felafax_env/bin/pip
 ENV_NAME=felafax_env
 REPO_DIR="/mnt/disk2/felafax_repo"
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-CONDA_PATH=/opt/conda/bin/conda
+CONDA_PATH=/home/antra_tesserae_cc/miniforge3/bin/conda
 ENV_NAME=felafax_env
 PYTHON_VERSION=3.10
 

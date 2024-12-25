@@ -17,8 +17,8 @@ EXPORT_DIR = os.path.join(TRAINER_DIR, "finetuned_export")
 # Dataset configuration
 dataset_config = data.DatasetConfig(
     data_source="yahma/alpaca-cleaned",
-    max_seq_length=512,
-    batch_size=32,
+    max_seq_length=256,  # Reduce memory footprint
+    batch_size=4,  # Global batch size will be 4 * 8 = 32
     num_workers=4,
     mask_prompt=False,
     train_test_split=0.15,

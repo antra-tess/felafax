@@ -11,13 +11,9 @@ TRAINER_DIR="/mnt/disk2/felafax_runs"
 CHECKPOINT_DIR="$TRAINER_DIR/checkpoints"
 EXPORT_DIR="$TRAINER_DIR/finetuned_export"
 
-# Create directories on shared disk
-for worker in $(seq 0 $((NUM_WORKERS-1))); do
-    echo "Setting up directories on worker $worker..."
-    gcloud compute tpus tpu-vm ssh $POD_NAME --zone=$ZONE --worker=$worker --command="
-        mkdir -p $TRAINER_DIR $CHECKPOINT_DIR $EXPORT_DIR
-    "
-done
+# Create directories on shared disk (only need to do this once since it's shared)
+echo "Creating shared directories..."
+mkdir -p $TRAINER_DIR $CHECKPOINT_DIR $EXPORT_DIR
 
 # Create and copy the training script
 cat > /tmp/run_training.py << 'EOL'
@@ -116,18 +112,40 @@ print("Exporting model...")
 trainer.export(export_dir=EXPORT_DIR)
 EOL
 
-# Copy the training script to all workers
+# Function to run commands on a worker
+run_on_worker() {
+    local worker=$1
+    echo "Setting up worker $worker..."
+    # Copy training script
+    gcloud compute tpus tpu-vm scp /tmp/run_training.py $POD_NAME:/tmp/run_training.py --zone=$ZONE --worker=$worker &
+}
+
+# Start setup on all workers in parallel
 for worker in $(seq 0 $((NUM_WORKERS-1))); do
-    echo "Copying training script to worker $worker..."
-    gcloud compute tpus tpu-vm scp /tmp/run_training.py $POD_NAME:/tmp/run_training.py --zone=$ZONE --worker=$worker
+    run_on_worker $worker
 done
 
-# Run training on worker 0 (main worker)
-echo "Starting training on worker 0..."
-gcloud compute tpus tpu-vm ssh $POD_NAME --zone=$ZONE --worker=0 --command="
-    source /home/antra_tesserae_cc/miniforge3/bin/activate felafax_env && \
-    cd \$HOME/felafax_repo && \
-    python /tmp/run_training.py
-"
+# Wait for all background processes to complete
+wait
 
-echo "Training complete!"
+# Function to start training on a worker
+start_training() {
+    local worker=$1
+    echo "Starting training on worker $worker..."
+    gcloud compute tpus tpu-vm ssh $POD_NAME --zone=$ZONE --worker=$worker --command="
+        source /home/antra_tesserae_cc/miniforge3/bin/activate felafax_env && \
+        cd \$HOME/felafax_repo && \
+        python /tmp/run_training.py
+    " &
+}
+
+# Start training on all workers in parallel
+echo "Starting training on all workers..."
+for worker in $(seq 0 $((NUM_WORKERS-1))); do
+    start_training $worker
+done
+
+# Wait for all training processes to complete
+wait
+
+echo "Training complete on all workers!"

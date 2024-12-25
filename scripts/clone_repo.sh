@@ -2,7 +2,7 @@
 set -e
 
 REPO_URL="https://github.com/antra-tess/felafax"
-TARGET_DIR="/mnt/disk2/felafax_repo"
+TARGET_DIR="$HOME/felafax_repo"
 
 echo "Cloning Felafax repository..."
 if [ -d "$TARGET_DIR" ]; then

@@ -40,9 +40,7 @@ def get_mesh(num_tpus: int, mesh_shape: Optional[Tuple[int, int, int]] = None):
         elif num_tpus == 16:
             mesh_shape = (1, 4, 4)
         elif num_tpus == 32:
-            mesh_shape = (2, 4, 4)  # For v4-32 configuration
-        elif num_tpus == 64:
-            mesh_shape = (4, 4, 4)  # For v4-64 configuration
+            mesh_shape = (4, 4, 2)  # (batch, fsdp, mp) - 32 devices
         else:
             raise ValueError(f"Invalid number of TPUs: {num_tpus}")
 
